@@ -16,7 +16,7 @@ export function EmptyScreen({
 }) {
   return (
     <div className="mx-auto max-w-2xl px-4">
-      <div className="rounded-lg border bg-empty-screen p-40 mb-4">
+      <div className="rounded-lg border bg-empty-screen md:p-40 p-12 mt-16 mb-4">
         <h1 className="mb-2 text-lg font-semibold">
           Welcome to Women's Day Quiz!
         </h1>
