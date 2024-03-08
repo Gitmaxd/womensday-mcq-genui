@@ -10,9 +10,9 @@ import { Header } from '@/components/header';
 import { Providers } from '@/components/providers';
 
 const meta = {
-  title: 'StudyChat',
+  title: 'Women\'s Day Quiz - AI Powered Quiz',
   description:
-    'Demo of an interactive financial assistant built using Next.js and Vercel AI SDK.',
+    'Take this quiz to test your knowledge about women and their achievements.',
 };
 export const metadata: Metadata = {
   ...meta,
