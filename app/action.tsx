@@ -150,7 +150,7 @@ async function loginProfile(instagram_username: string) {
   const confirm = createStreamableUI(
     <div className="inline-flex items-start gap-1 md:items-center">
       {spinner}
-      <p className='mt-2'>
+      <p>
         Confirming your details... working on it...
       </p>
     </div>,
