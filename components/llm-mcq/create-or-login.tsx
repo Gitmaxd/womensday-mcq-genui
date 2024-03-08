@@ -11,14 +11,14 @@ export function CreateOrLogin() {
     const { submitUserMessage } = useActions();
 
     return (
-        <div className='flex flex-row items-center space-x-4'>
+        <div className='flex flex-row items-center space-x-4 md:text-base text-sm mt-2'>
             <Button
                 onClick={async () => {
                     const response = await submitUserMessage(`Create Profile`);
                     setMessages(currentMessages => [...currentMessages, response]);
                 }}
             >
-                Create Profile
+                Create
             </Button>
             <Button
                 onClick={async () => {
@@ -26,7 +26,7 @@ export function CreateOrLogin() {
                     setMessages(currentMessages => [...currentMessages, response]);
                 }}
             >
-                Login to existing profile
+                Login
             </Button>
         </div>
     );

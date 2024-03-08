@@ -110,11 +110,11 @@ async function confirmProfile(username: string, instagram_username: string, bio:
     confirm.done(
       <div>
         <p className="mb-2">
-          Your details have been verified. You are now ready to play the quiz~
+          Your details have been verified.
         </p>
-        <BotCard showAvatar={false}>
+        {/* <BotCard showAvatar={false}> */}
           <StartQuiz />
-        </BotCard>
+        {/* </BotCard> */}
       </div>,
     );
 
@@ -195,11 +195,11 @@ async function loginProfile(instagram_username: string) {
     confirm.done(
       <div>
         <p className="mb-2">
-          Your details have been verified. You are now ready to play the quiz~
+          Your details have been verified.
         </p>
-        <BotCard showAvatar={false}>
+        {/* <BotCard showAvatar={false}> */}
           <StartQuiz />
-        </BotCard>
+        {/* </BotCard> */}
       </div>,
     );
 
