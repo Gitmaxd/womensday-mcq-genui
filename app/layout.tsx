@@ -17,8 +17,8 @@ const meta = {
 export const metadata: Metadata = {
   ...meta,
   title: {
-    default: 'AI RSC Demo',
-    template: `%s - AI RSC Demo`,
+    default: `Women's Day Quiz - AI Powered Quiz`,
+    template: `%s - Women's Day Quiz - AI Powered Quiz`,
   },
   icons: {
     icon: '/favicon.ico',
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   twitter: {
     ...meta,
     card: 'summary_large_image',
-    site: '@vercel',
+    site: '@zaidmukaddam',
   },
   openGraph: {
     ...meta,
@@ -39,8 +39,8 @@ export const metadata: Metadata = {
 
 export const viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: 'white' },
-    { media: '(prefers-color-scheme: dark)', color: 'white' },
+    { media: '(prefers-color-scheme: light)', color: 'dark' },
+    { media: '(prefers-color-scheme: dark)', color: 'dark' },
   ],
 };
 
@@ -58,7 +58,7 @@ export default function RootLayout({
         <AI>
           <Providers
             attribute="class"
-            defaultTheme="system"
+            defaultTheme="dark"
             enableSystem
             disableTransitionOnChange
           >

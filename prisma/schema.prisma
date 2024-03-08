@@ -1,0 +1,17 @@
+generator client {
+  provider = "prisma-client-js"
+}
+ 
+datasource db {
+  provider = "postgresql"
+  // Uses connection pooling
+  url = env("DATABASE_URL")
+}
+ 
+model profiles {
+  id                 Int      @id @default(autoincrement())
+  score              Int
+  username           String   @unique
+  instagram_username String
+  bio                String
+}

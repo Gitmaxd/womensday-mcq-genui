@@ -12,5 +12,5 @@ export const MCQSkeleton = () => {
         return () => clearInterval(interval);
     }, []);
 
-    return <div className="flex flex-row items-center text-md leading-none text-zinc-500">Generating question{dots}</div>;
+    return <div className="flex flex-row items-center text-md leading-none text-zinc-500 mt-2">Generating question{dots}</div>;
 };

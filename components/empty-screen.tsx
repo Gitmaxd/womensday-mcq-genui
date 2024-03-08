@@ -4,16 +4,8 @@ import { IconArrowRight } from '@/components/ui/icons';
 
 const exampleMessages = [
   {
-    heading: `Introduction to Women's Day`,
-    message: `Ask me MCQ questions on Women's Day`,
-  },
-  {
-    heading: "Sorting Algorithms",
-    message: "Ask me MCQ questions on Sorting Algorithms",
-  },
-  {
-    heading: "Human Anatomy",
-    message: "Ask me MCQ questions on Human Anatomy",
+    heading: `Start quiz`,
+    message: `hello`,
   },
 ];
 
@@ -24,17 +16,17 @@ export function EmptyScreen({
 }) {
   return (
     <div className="mx-auto max-w-2xl px-4">
-      <div className="rounded-lg border bg-background p-8 mb-4">
+      <div className="rounded-lg border bg-empty-screen p-40 mb-4">
         <h1 className="mb-2 text-lg font-semibold">
-          Select a topic would you like to test yourself on
+          Welcome to Women's Day Quiz!
         </h1>
-        <p className="leading-normal text-muted-foreground">Here are some examples:</p>
+        <p className="leading-normal text-muted-foreground">Tap on the button below to get started.</p>
         <div className="mt-4 flex flex-col items-start space-y-2 mb-4">
           {exampleMessages.map((message, index) => (
             <Button
               key={index}
-              variant="link"
-              className="h-auto p-0 text-base"
+              variant="outline"
+              className="h-auto text-base"
               onClick={async () => {
                 submitMessage(message.message);
               }}
@@ -45,9 +37,9 @@ export function EmptyScreen({
           ))}
         </div>
       </div>
-      {/* <p className="leading-normal text-muted-foreground text-[0.8rem] text-center">
-        Note: This is not real financial advice.
-      </p> */}
+      <p className="leading-normal text-muted-foreground text-[0.8rem] text-center">
+        Note: This is an AI powered quiz. You can ask questions or start the quiz by tapping on the button above.
+      </p>
     </div>
   );
 }

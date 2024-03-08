@@ -19,21 +19,29 @@ import {
   runOpenAICompletion,
 } from '@/lib/utils';
 import { z } from 'zod';
+import { useState } from 'react';
+import { ProfileForm } from '@/components/llm-mcq/detail-form';
+import prisma from '@/lib/prisma';
+import { Button } from '@/components/ui/button';
+import { StartQuiz } from '@/components/llm-mcq/start-quiz';
+import { CreateOrLogin } from '@/components/llm-mcq/create-or-login';
+import { LoginForm } from '@/components/llm-mcq/login-form';
+import { ScoreCard } from '@/components/llm-mcq/score-card';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '',
 });
 
-async function confirmPurchase(symbol: string, price: number, amount: number) {
+async function confirmProfile(username: string, instagram_username: string, bio: string) {
   'use server';
 
   const aiState = getMutableAIState<typeof AI>();
 
-  const purchasing = createStreamableUI(
+  const confirm = createStreamableUI(
     <div className="inline-flex items-start gap-1 md:items-center">
       {spinner}
-      <p className="mb-2">
-        Purchasing {amount} ${symbol}...
+      <p>
+        Confirming your details... working on it...
       </p>
     </div>,
   );
@@ -42,32 +50,77 @@ async function confirmPurchase(symbol: string, price: number, amount: number) {
 
   runAsyncFnWithoutBlocking(async () => {
     // You can update the UI at any point.
-    await sleep(1000);
+    await prisma.profiles.create({
+      data: {
+        username: username,
+        instagram_username: instagram_username,
+        bio: bio,
+        score: 0
+      },
+    });
 
-    purchasing.update(
+    confirm.update(
       <div className="inline-flex items-start gap-1 md:items-center">
         {spinner}
         <p className="mb-2">
-          Purchasing {amount} ${symbol}... working on it...
+          Verifing your details... working on it...
         </p>
       </div>,
     );
 
-    await sleep(1000);
+    // fetch the user details from the database using the username
+    const user = await prisma.profiles.findUnique({
+      where: {
+        username: username,
+      },
+    });
 
-    purchasing.done(
+    if (!user) {
+      confirm.done(
+        <div>
+          <p className="mb-2">
+            Your details could not be verified. Please try again later.
+          </p>
+          <Button
+            onClick={() => {
+              location.reload();
+            }}
+          >
+            Try again
+          </Button>
+        </div>,
+      );
+
+      systemMessage.done(
+        <SystemMessage>
+          Your details could not be verified. Please try again later.
+        </SystemMessage>,
+      );
+
+      aiState.done([
+        ...aiState.get(),
+        {
+          role: 'system',
+          content: `[User details could not be verified. Please try again later.]`,
+        },
+      ]);
+      return;
+    }
+
+    confirm.done(
       <div>
         <p className="mb-2">
-          You have successfully purchased {amount} ${symbol}. Total cost:{' '}
-          {formatNumber(amount * price)}
+          Your details have been verified. You are now ready to play the quiz~
         </p>
+        <BotCard showAvatar={false}>
+          <StartQuiz />
+        </BotCard>
       </div>,
     );
 
     systemMessage.done(
       <SystemMessage>
-        You have purchased {amount} shares of {symbol} at ${price}. Total cost ={' '}
-        {formatNumber(amount * price)}.
+        Your details have been verified. You are now ready to play the quiz~
       </SystemMessage>,
     );
 
@@ -75,14 +128,145 @@ async function confirmPurchase(symbol: string, price: number, amount: number) {
       ...aiState.get(),
       {
         role: 'system',
-        content: `[User has purchased ${amount} shares of ${symbol} at ${price}. Total cost = ${amount * price
-          }]`,
+        content: `[User details have been verified. You are now ready to play the quiz~]`,
       },
     ]);
   });
 
   return {
-    purchasingUI: purchasing.value,
+    confirmUI: confirm.value,
+    newMessage: {
+      id: Date.now(),
+      display: systemMessage.value,
+    },
+  };
+}
+
+async function loginProfile(instagram_username: string) {
+  'use server';
+
+  const aiState = getMutableAIState<typeof AI>();
+
+  const confirm = createStreamableUI(
+    <div className="inline-flex items-start gap-1 md:items-center">
+      {spinner}
+      <p className='mt-2'>
+        Confirming your details... working on it...
+      </p>
+    </div>,
+  );
+
+  const systemMessage = createStreamableUI(null);
+
+  runAsyncFnWithoutBlocking(async () => {
+    // fetch the user details from the database using the username
+    const user = await prisma.profiles.findUnique({
+      where: {
+        username: instagram_username,
+      },
+    });
+
+    if (!user) {
+      confirm.done(
+        <div>
+          <p className="mb-2">
+            Your username could not be found. Please login or create an account.
+          </p>
+          <CreateOrLogin />
+        </div>,
+      );
+
+      systemMessage.done(
+        <SystemMessage>
+          Your username could not be found. Please login or create an account.
+        </SystemMessage>,
+      );
+
+      aiState.done([
+        ...aiState.get(),
+        {
+          role: 'system',
+          content: `[User details could not be verified. Please try again later.]`,
+        },
+      ]);
+      return;
+    }
+
+    confirm.done(
+      <div>
+        <p className="mb-2">
+          Your details have been verified. You are now ready to play the quiz~
+        </p>
+        <BotCard showAvatar={false}>
+          <StartQuiz />
+        </BotCard>
+      </div>,
+    );
+
+    systemMessage.done(
+      <SystemMessage>
+        Your details have been verified. You are now ready to play the quiz~
+      </SystemMessage>,
+    );
+
+    aiState.done([
+      ...aiState.get(),
+      {
+        role: 'system',
+        content: `[User details have been verified. You are now ready to play the quiz~]`,
+      },
+    ]);
+  });
+
+  return {
+    confirmUI: confirm.value,
+    newMessage: {
+      id: Date.now(),
+      display: systemMessage.value,
+    },
+  };
+}
+
+async function updateScore(username: string, score: number) {
+  "use server";
+
+  const aiState = getMutableAIState<typeof AI>();
+  const systemMessage = createStreamableUI(null);
+
+  const user = await prisma.profiles.findUnique({
+    where: {
+      username: username,
+    },
+  });
+
+  if (!user) {
+    return;
+  }
+  // increment the score by 1
+  await prisma.profiles.update({
+    where: {
+      username: username,
+    },
+    data: {
+      score: user.score + score,
+    },
+  });
+
+  systemMessage.done(
+    <SystemMessage>
+      Your score has been updated.
+    </SystemMessage>,
+  );
+
+  aiState.done([
+    ...aiState.get(),
+    {
+      role: 'system',
+      content: `Your score has been updated.`,
+    },
+  ]);
+
+  return {
     newMessage: {
       id: Date.now(),
       display: systemMessage.value,
@@ -112,21 +296,25 @@ async function submitUserMessage(content: string) {
     messages: [
       {
         role: 'system',
-        content: `You are a conversation bot and you have to ask users play along by quizzing them.
+        content: `You are a quiz bot and you have quiz your users.
 
-You have to give them 8 random questions about about women, their history, their facts, their role in changing the society, their role in love and more the user can answer questions about them in the form of MCQ questions.
+You have to give them 8 random question about about women, their history, their facts, their role in changing the society, their role in love and more the user can answer questions about them in the form of MCQ questions.
 
 Messages inside [] means that it's a UI element or a user event. For example:
 - "[MCQs are of topic = X]" means that an interface displays MCQ questions for a topic.
 - "[User has selected MCQ answer = B]" means the user has clicked on answer a out of A, B, C, D as the answer to the MCQ.
 
-Always call \`show_mcq_questions\` to show the questions UI.
+First, call \`create_or_login_ui\` to show the create or login UI to the user.
+If the user wants to create a profile then call \`show_details_form\` to show the details form to the user to put in their details.
+If the user wants to login then call \`show_login_form\` to show the login form to the user.
+Call \`show_mcq_questions\` to show the MCQ questions UI for each quesition or when asked "Ask me another MCQ" and after the form is filled.
+Call \`show_score_card_ui\` to show the score card UI to the user after the quiz is over, if asked to show then show the score card UI to the user.
+
+Once the quiz is over, you have to show the score card to the user using the function \`show_score_card_ui\`.
 
 Shuffle all the answers to the MCQ questions so that the user cannot guess the answer by the position of the options AT ALL COSTS!
 
-Please follow the UI fomatting and the user's request thoroughly.
-
-Besides that, you cannot chat with users other then telling that the quiz is over in a decent manner to respect women.`,
+Besides that, you cannot chat with users at all costs! Other then telling that the quiz is over in a decent manner to respect women.`,
       },
       ...aiState.get().map((info: any) => ({
         role: info.role,
@@ -149,6 +337,34 @@ Besides that, you cannot chat with users other then telling that the quiz is ove
           answer: z.array(z.string()).max(1).describe('The answer to the question. Please shuffle this among A, B, C and D. Do not put the answer at the first position.')
         }),
       },
+      {
+        name: "show_details_form",
+        description: "Show the details form for the user to fill in.",
+        // no parameters
+        parameters: z.object({}),
+      },
+      {
+        name: "show_login_form",
+        description: "Show the login form for the user to fill in.",
+        // no parameters
+        parameters: z.object({}),
+      },
+      {
+        name: "create_or_login_ui",
+        description: "Show the create or login UI to the user.",
+        // no parameters
+        parameters: z.object({}),
+      },
+      {
+        name: "show_score_card_ui",
+        description: "Show the score card UI to the user.",
+        parameters: z.object({
+          username: z.string().describe('The username of the user.'),
+          instagram_username: z.string().describe('The instagram username of the user.'),
+          bio: z.string().describe('The bio of the user.'),
+          score: z.number().describe('The score of the user.'),
+        }),
+      }
     ],
     temperature: 1,
   });
@@ -159,6 +375,120 @@ Besides that, you cannot chat with users other then telling that the quiz is ove
       reply.done();
       aiState.done([...aiState.get(), { role: 'assistant', content }]);
     }
+  });
+
+  completion.onFunctionCall('show_score_card_ui', async ({ username }) => {
+    const user = await prisma.profiles.findUnique({
+      where: {
+        username: username,
+      },
+    });
+
+    if (!user) {
+      reply.done(
+        <BotMessage>
+          <p>
+            Your score isn't available at the moment. Please try again later.
+          </p>
+        </BotMessage>,
+      );
+
+      aiState.done([
+        ...aiState.get(),
+        {
+          role: 'system',
+          content: `[User score isn't available at the moment. Please try again later.]`,
+        },
+      ]);
+      return;
+    }
+
+    reply.done(
+      <BotCard>
+        <ScoreCard username={username} instagram_username={user.instagram_username} bio={user.bio} score={user.score} />
+      </BotCard>,
+    );
+
+    aiState.done([
+      ...aiState.get(),
+      {
+        role: 'function',
+        name: 'show_score_card_ui',
+        content: `[UI for showing the score card to the user]`,
+      },
+    ]);
+  });
+
+  completion.onFunctionCall('show_login_form', async () => {
+    reply.done(
+      <>
+        <BotMessage>
+          <p>
+            Please login to get started.
+          </p>
+        </BotMessage>
+        <BotCard showAvatar={false}>
+          <LoginForm />
+        </BotCard>
+      </>
+    );
+
+    aiState.done([
+      ...aiState.get(),
+      {
+        role: 'function',
+        name: 'show_login_form',
+        content: `[UI for showing the login form to the user]`,
+      },
+    ]);
+  });
+
+  completion.onFunctionCall('create_or_login_ui', async () => {
+    reply.done(
+      <>
+        <BotMessage>
+          <p>
+            Please login or create an account to get started.
+          </p>
+        </BotMessage>
+        <BotCard showAvatar={false}>
+          <CreateOrLogin />
+        </BotCard>
+      </>
+    );
+
+    aiState.done([
+      ...aiState.get(),
+      {
+        role: 'function',
+        name: 'create_or_login_ui',
+        content: `[UI for showing the create or login form to the user]`,
+      },
+    ]);
+  });
+
+  completion.onFunctionCall('show_details_form', async () => {
+    reply.done(
+      <>
+        <BotMessage>
+          <p>
+            Please fill in the details form below to get started.
+          </p>
+        </BotMessage>
+        <BotCard showAvatar={false}>
+          <ProfileForm />
+        </BotCard>
+      </>
+    );
+
+    aiState.done([
+      ...aiState.get(),
+      {
+        role: 'function',
+        name: 'show_details_form',
+        content: `[UI for showing the details form to the user]`,
+      },
+    ]);
   });
 
   completion.onFunctionCall('show_mcq_question', async ({ topic, question, options, answer }) => {
@@ -211,7 +541,9 @@ const initialUIState: {
 export const AI = createAI({
   actions: {
     submitUserMessage,
-    confirmPurchase,
+    confirmProfile,
+    loginProfile,
+    updateScore,
   },
   initialUIState,
   initialAIState,
