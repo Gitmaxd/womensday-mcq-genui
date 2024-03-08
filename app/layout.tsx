@@ -10,6 +10,7 @@ import { Header } from '@/components/header';
 import { Providers } from '@/components/providers';
 
 const meta = {
+  metadataBase: new URL('https://womensdayquiz.za16.fyi/'),
   title: 'Women\'s Day Quiz - AI Powered Quiz',
   description:
     'Take this quiz to test your knowledge about women and their achievements.',
