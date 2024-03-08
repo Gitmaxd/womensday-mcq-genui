@@ -11,7 +11,7 @@ export function StartQuiz() {
     const { submitUserMessage } = useActions();
 
     return (
-        <div>
+        <div className='space-x-4'>
             <Button
                 onClick={async () => {
                     const response = await submitUserMessage(`Ask me MCQs`);
@@ -19,6 +19,14 @@ export function StartQuiz() {
                 }}
             >
                 Start Quiz
+            </Button>
+            <Button
+            onClick={async () => {
+                const response = await submitUserMessage(`Show my score card`);
+                setMessages(currentMessages => [...currentMessages, response]);
+            }
+            }>
+                Score Card
             </Button>
         </div>
     );

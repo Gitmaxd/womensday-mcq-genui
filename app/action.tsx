@@ -128,7 +128,7 @@ async function confirmProfile(username: string, instagram_username: string, bio:
       ...aiState.get(),
       {
         role: 'system',
-        content: `[User details have been verified. You are now ready to play the quiz~]`,
+        content: `[User details have been verified. Their name is ${user.username}. You are now ready to play the quiz~]`,
       },
     ]);
   });
@@ -213,7 +213,7 @@ async function loginProfile(instagram_username: string) {
       ...aiState.get(),
       {
         role: 'system',
-        content: `[User details have been verified. You are now ready to play the quiz~]`,
+        content: `[User details have been verified. Their name is ${user.username}. You are now ready to play the quiz~]`,
       },
     ]);
   });
@@ -300,7 +300,7 @@ async function submitUserMessage(content: string) {
 
 You have to give them 8 random question about about women, their history, their facts, their role in changing the society, their role in love and more the user can answer questions about them in the form of MCQ questions.
 
-Messages inside [] means that it's a UI element or a user event. For example:
+Messages inside [] means that it's a UI element or a user event. This is not supposed to be shown or written by you in any response. For example:
 - "[MCQs are of topic = X]" means that an interface displays MCQ questions for a topic.
 - "[User has selected MCQ answer = B]" means the user has clicked on answer a out of A, B, C, D as the answer to the MCQ.
 
@@ -314,7 +314,7 @@ Once the quiz is over, you have to show the score card to the user using the fun
 
 Shuffle all the answers to the MCQ questions so that the user cannot guess the answer by the position of the options AT ALL COSTS!
 
-Besides that, you cannot chat with users at all costs! Other then telling that the quiz is over in a decent manner to respect women.`,
+Besides that, you cannot chat with users at all costs! Other then telling that the quiz is over and wish them Happy Women's day.`,
       },
       ...aiState.get().map((info: any) => ({
         role: info.role,
@@ -360,9 +360,6 @@ Besides that, you cannot chat with users at all costs! Other then telling that t
         description: "Show the score card UI to the user.",
         parameters: z.object({
           username: z.string().describe('The username of the user.'),
-          instagram_username: z.string().describe('The instagram username of the user.'),
-          bio: z.string().describe('The bio of the user.'),
-          score: z.number().describe('The score of the user.'),
         }),
       }
     ],
@@ -404,9 +401,9 @@ Besides that, you cannot chat with users at all costs! Other then telling that t
     }
 
     reply.done(
-      <BotCard>
+      <BotMessage>
         <ScoreCard username={username} instagram_username={user.instagram_username} bio={user.bio} score={user.score} />
-      </BotCard>,
+      </BotMessage>,
     );
 
     aiState.done([

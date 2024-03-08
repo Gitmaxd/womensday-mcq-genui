@@ -21,26 +21,32 @@ export function ScoreCard({ username, instagram_username, bio, score }:
         bio: string;
         score: number;
     }) {
+
+    const userName = localStorage.getItem('username');
+    const [downloadString, setDownloadString] = React.useState<string>('Share');
+    console.log("[DEBUG] username: ", userName);
     const cardRef = React.useRef<HTMLDivElement>(null);
     function downloadScore() {
         if (cardRef.current == null) return;
+        setDownloadString('Happy Women\'s Day');
         toPng(cardRef.current as HTMLElement, { cacheBust: true, pixelRatio: 3 })
             .then((dataUrl) => {
                 const link = document.createElement('a');
                 link.download = `${username}-score.png`;
                 link.href = dataUrl;
                 link.click();
+                setDownloadString('Share');
             })
     }
     return (
-        <div className="relative" ref={cardRef}>
+        <div className="relative max-w-80" ref={cardRef}>
             <div className="absolute inset-0 z-0 max-w-80 rounded-lg">
                 <Image
                     alt="bg"
-                    src="/imag.svg"
+                    src="/imdg.png"
                     layout="fill"
                     objectFit="cover"
-                    className="rounded-lg"
+                    className="rounded-xl"
                 />
             </div>
             <Card className="z-10 relative max-w-80 bg-inherit">
@@ -49,7 +55,7 @@ export function ScoreCard({ username, instagram_username, bio, score }:
                 </CardHeader>
                 <CardContent>
                     <CardDescription>
-                        <p className="text-xl text-white">{score}/8</p>
+                        <p className="text-xl text-white">{score} ~ score till now</p>
                         <p className="text-sm text-white">@{instagram_username}</p>
                         <p className="text-sm text-white">{bio}</p>
                     </CardDescription>
@@ -59,7 +65,7 @@ export function ScoreCard({ username, instagram_username, bio, score }:
                         onClick={downloadScore}
                         className="w-full"
                     >
-                        Share
+                        {downloadString}
                     </Button>
                 </CardFooter>
             </Card>
