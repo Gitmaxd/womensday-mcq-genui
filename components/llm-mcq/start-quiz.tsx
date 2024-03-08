@@ -11,7 +11,7 @@ export function StartQuiz() {
     const { submitUserMessage } = useActions();
 
     return (
-        <div className='space-x-2 flex flex-row md:flex-col'>
+        <div className='space-x-2 flex flex-row'>
             <Button
                 onClick={async () => {
                     const response = await submitUserMessage(`Ask me MCQs`);
